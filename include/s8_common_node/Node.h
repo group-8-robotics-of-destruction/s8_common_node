@@ -10,6 +10,8 @@
 #include <ros/ros.h>
 #include <boost/variant.hpp>
 
+#define PRINT_PADDING       5
+
 namespace s8 {
     class Node {
         struct Param {
@@ -35,12 +37,14 @@ namespace s8 {
 
     private:
         std::vector<Param> params;
+        int longest_name_length;
+        const int print_padding;
 
     protected:
         ros::NodeHandle nh;
 
     public:
-        Node() : nh("~") {}
+        Node(int print_padding = PRINT_PADDING) : nh("~"), longest_name_length(0), print_padding(print_padding) {}
 
         /**
          * This functions register a static ros paramater. The node will try to fetch the value from the rosparam server.
@@ -51,6 +55,10 @@ namespace s8 {
         void add_param(const std::string & name, T & destination, const T & default_value) {
             params.push_back(Param(name, default_value, &destination));
             init_param(name, destination, default_value);
+
+            if(name.length() > longest_name_length) {
+                longest_name_length = name.length();
+            }
         }
 
         //TODO: update_param.
@@ -61,13 +69,28 @@ namespace s8 {
         void print_params() {
             ROS_INFO("--Params--");
 
+            std::string padding;
+
+            auto bool_to_str = [](bool value) {
+                return value ? "true" : "false";
+            };
+
             for(auto param : params) {
+                int missing = longest_name_length + print_padding - param.name.length();
+                padding.assign(missing, ' ');
+
                 switch(Param::Type(param.default_value.which())) {
+                case Param::Type::BOOL:
+                    ROS_INFO("%s:%s%s (%s)", param.name.c_str(), padding.c_str(), bool_to_str(*boost::get<bool*>(param.destination)), bool_to_str(boost::get<bool>(param.default_value)));
+                    break;
                 case Param::Type::INT:
-                    ROS_INFO("%s: \t\t\t %d", param.name.c_str(), boost::get<int>(param.default_value));
+                    ROS_INFO("%s:%s%d (%d)", param.name.c_str(), padding.c_str(), *boost::get<int*>(param.destination), boost::get<int>(param.default_value));
                     break;
                 case Param::Type::DOUBLE:
-                    ROS_INFO("%s: \t\t\t %lf", param.name.c_str(), boost::get<double>(param.default_value));
+                    ROS_INFO("%s:%s%lf (%lf)", param.name.c_str(), padding.c_str(), *boost::get<double*>(param.destination), boost::get<double>(param.default_value));
+                    break;
+                case Param::Type::STRING:
+                    ROS_INFO("%s:%s%s (%s)", param.name.c_str(), padding.c_str(), (*boost::get<std::string*>(param.destination)).c_str(), boost::get<std::string>(param.default_value).c_str());
                     break;
                 }
             }
