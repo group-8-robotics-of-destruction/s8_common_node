@@ -1,0 +1,17 @@
+<package>
+ <name>s8_common_node</name>
+  <version>0.1.0</version>
+  <description>
+    Base Node to extend for nice common functionality. Provides an interface for handling params and creates the NodeHandle.
+  </description>
+  <license>BSD</license>
+
+  <author email="lwiener@kth.se">Lucas Wiener</author>
+  <maintainer email="lwiener@kth.se">Lucas Wiener</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+</package>
