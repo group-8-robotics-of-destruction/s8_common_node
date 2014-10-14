@@ -26,7 +26,11 @@ namespace s8 {
             boost::variant<bool*, int*, double*, std::string*> destination;
 
             template<typename T>
-            Param(const std::string & name, const T & default_value, T * destination);
+            Param(const std::string & name, const T & default_value, T * destination) {
+                this->name = name;
+                this->default_value = default_value;
+                this->destination = destination;
+            }
         };
 
     private:
@@ -44,7 +48,10 @@ namespace s8 {
          * local parameter. The read/write will only occur once (i.e. when this function is called).
          */
         template<typename T>
-        void add_param(const std::string & name, T & destination, const T & default_value);
+        void add_param(const std::string & name, T & destination, const T & default_value) {
+            params.push_back(Param(name, default_value, &destination));
+            init_param(name, destination, default_value);
+        }
 
         //TODO: update_param.
 
