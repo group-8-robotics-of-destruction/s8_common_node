@@ -61,6 +61,13 @@ namespace s8 {
             }
         }
 
+        /**
+         * Fix for above method when destination is a std::string but default value is a char[].
+         */
+        void add_param(const std::string & name, std::string & destination, const char default_value[]) {
+            add_param(name, destination, std::string(default_value));
+        }
+
         //TODO: update_param.
 
         /**
